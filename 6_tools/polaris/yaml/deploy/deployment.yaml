@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: polaris-dashboard
+  namespace: polaris
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: polaris
+  template:
+    metadata:
+      labels:
+        app: polaris
+    spec:
+      serviceAccountName: polaris-dashboard
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: polaris-dashboard
+          image: quay.io/fairwinds/polaris:7.0.2
+          imagePullPolicy: IfNotPresent
+          command:
+            - polaris
+            - dashboard
+            - --port
+            - "8080"
+            - --config
+            - "/etc/config.yaml"
+          ports:
+            - name: http-dashboard
+              containerPort: 8080
+          resources:
+            requests:
+              cpu: 10m
+              memory: 256Mi
+            limits:
+              cpu: 150m
+              memory: 256Mi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 20
+          securityContext:
+            privileged: false
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - mountPath: /etc/config.yaml
+              subPath: config.yaml
+              name: config
+      volumes:
+        - name: config
+          configMap:
+            name: polaris
+            items:
+              - key: config.yaml
+                path: config.yaml

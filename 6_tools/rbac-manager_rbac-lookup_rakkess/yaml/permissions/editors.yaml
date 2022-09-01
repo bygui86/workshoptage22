@@ -1,0 +1,16 @@
+apiVersion: rbacmanager.reactiveops.io/v1beta1
+kind: RBACDefinition
+metadata:
+  name: editors
+rbacBindings:
+  - name: admin
+    subjects:
+      - kind: User
+        name: admin@dex.io
+    clusterRoleBindings:
+      - clusterRole: custom-ns-only
+    roleBindings:
+      - clusterRole: custom-edit
+        namespace: default
+      - clusterRole: custom-view
+        namespace: kube-system

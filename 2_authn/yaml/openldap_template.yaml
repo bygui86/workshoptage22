@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openldap
+  labels:
+    app: openldap
+spec:
+  selector:
+    matchLabels:
+      app: openldap
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: openldap
+    spec:
+      containers:
+        - name: openldap
+          image: bitnami/openldap:2.6.3
+          imagePullPolicy: Always
+          envFrom:
+            - secretRef:
+                name: openldap-admin
+          ports:
+            - name: tcp-ldap
+              containerPort: 1389
+          volumeMounts:
+            - name: config
+              mountPath: /ldifs
+      volumes:
+        - name: config
+          secret:
+            secretName: openldap-config
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: openldap-admin
+  labels:
+    app: openldap
+stringData:
+  LDAP_ADMIN_USERNAME: ${LDAP_ADMIN_USERNAME}
+  LDAP_ADMIN_PASSWORD: ${LDAP_ADMIN_PASSWORD}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: openldap-config
+  labels:
+    app: openldap
+stringData:
+  # TODO replace "dc=example" with "dc=ldap"
+  # TODO replace "example.com" with "ldap.io"
+  openldap.ldif: |
+    dn: dc=example,dc=org
+    objectClass: dcObject
+    objectClass: organization
+    dc: example
+    o: example
+
+    dn: ou=users,dc=example,dc=org
+    objectClass: organizationalUnit
+    ou: users
+
+    dn: cn=user01,ou=users,dc=example,dc=org
+    cn: User1
+    cn: user01
+    sn: Bar1
+    objectClass: inetOrgPerson
+    objectClass: posixAccount
+    objectClass: shadowAccount
+    userPassword: password01
+    uid: user01
+    mail: user01@example.com
+    uidNumber: 1000
+    gidNumber: 1000
+    homeDirectory: /home/user01
+
+    dn: cn=user02,ou=users,dc=example,dc=org
+    cn: User2
+    cn: user02
+    sn: Bar2
+    objectClass: inetOrgPerson
+    objectClass: posixAccount
+    objectClass: shadowAccount
+    userPassword: password02
+    uid: user02
+    mail: user02@example.com
+    uidNumber: 1001
+    gidNumber: 1001
+    homeDirectory: /home/user02
+
+    dn: cn=clusterusers,ou=users,dc=example,dc=org
+    cn: clusterusers
+    objectClass: groupOfNames
+    member: cn=user01,ou=users,dc=example,dc=org
+    member: cn=user02,ou=users,dc=example,dc=org
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: openldap
+  labels:
+    app: openldap
+spec:
+  type: NodePort
+  selector:
+    app: openldap
+  ports:
+    - port: 1389
+      name: openldap
+      targetPort: tcp-ldap
+      nodePort: 32500

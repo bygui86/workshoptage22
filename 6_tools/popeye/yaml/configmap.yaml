@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: popeye-spinach
+  namespace: default
+  labels:
+    app: popeye
+data:
+  spinach.yaml: |-
+    popeye:
+      allocations: # percent
+        cpu:
+          underPercUtilization: 50
+          overPercUtilization: 200
+        memory:
+          underPercUtilization: 50
+          overPercUtilization: 200
+      node:
+        limits: # percent
+          cpu: 90
+          memory: 90
+      pod:
+        restarts:
+          3
+        limits: # percent
+          cpu: 80
+          memory: 75
+      excludes:
+        v1/namespaces:
+          - name: kube-node-lease
+          - name: kube-public
+        v1/serviceaccounts:
+          # We don’t check the kube* service accounts - this is part of the platform
+          - name: rx:^kube
+          - name: default/default
+            codes:
+              - 400

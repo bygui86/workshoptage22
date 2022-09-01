@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busybox-a
+  namespace: default
+  labels:
+    app: busybox-a
+    test: network-policies
+spec:
+  containers:
+    - name: busybox
+      image: busybox:1.35.0
+      imagePullPolicy: IfNotPresent
+      command: [ "sh", "-c", "sleep 1h" ]
+      resources:
+        requests:
+          cpu: 100m
+          memory: 32Mi
+        limits:
+          cpu: 100m
+          memory: 32Mi
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busybox-b
+  namespace: default
+  labels:
+    app: busybox-b
+    test: network-policies
+spec:
+  containers:
+    - name: busybox
+      image: busybox:1.35.0
+      imagePullPolicy: IfNotPresent
+      command: [ "sh", "-c", "sleep 1h" ]
+      resources:
+        requests:
+          cpu: 100m
+          memory: 32Mi
+        limits:
+          cpu: 100m
+          memory: 32Mi
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busybox-c
+  namespace: kube-system
+  labels:
+    app: busybox-c
+    test: network-policies
+spec:
+  containers:
+    - name: busybox
+      image: busybox:1.35.0
+      imagePullPolicy: IfNotPresent
+      command: [ "sh", "-c", "sleep 1h" ]
+      resources:
+        requests:
+          cpu: 100m
+          memory: 32Mi
+        limits:
+          cpu: 100m
+          memory: 32Mi

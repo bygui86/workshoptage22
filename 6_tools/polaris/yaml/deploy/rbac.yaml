@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: polaris-dashboard
+  namespace: polaris
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: polaris-dashboard-view
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: view
+subjects:
+  - kind: ServiceAccount
+    name: polaris-dashboard
+    namespace: polaris
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: polaris-dashboard
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: polaris-dashboard
+subjects:
+  - kind: ServiceAccount
+    name: polaris-dashboard
+    namespace: polaris
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: polaris-dashboard
+rules:
+  # INFO: required by controller-runtime code doing a cluster wide lookup when it seems namespace would suffice
+  - apiGroups:
+      - ""
+    resources:
+      - nodes
+    verbs:
+      - get
+      - list
+
+  - apiGroups:
+      - apps
+    resources:
+      - Deployment
+      - DaemonSet
+      - StatefulSet
+    verbs:
+      - get
+      - list

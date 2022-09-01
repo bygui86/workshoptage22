@@ -1,0 +1,48 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: popeye
+  namespace: default
+  labels:
+    app: popeye
+spec:
+  # The Kubernetes Job will fail just because `popeye` command exit with code 1 if the score is not high enough (> 90) corresponding to a global evaluation of `A`.
+  backoffLimit: 0
+  template:
+    metadata:
+      labels:
+        app: popeye
+    spec:
+      serviceAccountName: popeye
+      restartPolicy: Never
+      containers:
+        - name: popeye
+          image: derailed/popeye:v0.10.1
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/popeye
+          args:
+            # The Spinach YAML Configuration
+            - -f
+            - /etc/config/popeye/spinach.yaml
+            # Sanitize all namespaces
+            - -A
+            # Check for cpu/memory over allocations
+            - --over-allocs
+            # Specify the output type: standard (default), jurassic, yaml, json, html, junit, prometheus, score
+            - -o
+            - yaml
+          resources:
+            limits:
+              cpu: 500m
+              memory: 100Mi
+          volumeMounts:
+            - mountPath: /etc/config/popeye/
+              name: spinach
+      volumes:
+        - name: spinach
+          configMap:
+            name: popeye-spinach
+            items:
+              - key: spinach.yaml
+                path: spinach.yaml

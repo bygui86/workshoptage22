@@ -1,0 +1,19 @@
+apiVersion: rbacmanager.reactiveops.io/v1beta1
+kind: RBACDefinition
+metadata:
+  name: viewers
+rbacBindings:
+  - name: user1
+    subjects:
+      - kind: User
+        name: user1@dex.io
+    roleBindings:
+      - clusterRole: custom-view
+        namespace: default
+  - name: user2
+    subjects:
+      - kind: User
+        name: user2@dex.io
+    roleBindings:
+      - clusterRole: custom-view
+        namespace: default

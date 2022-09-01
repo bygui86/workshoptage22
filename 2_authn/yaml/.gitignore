@@ -1,0 +1,5 @@
+
+# generated files
+dex.yaml
+dex-k8s-authenticator.yaml
+openldap.yaml

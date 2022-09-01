@@ -1,0 +1,89 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: polaris
+  namespace: polaris
+data:
+  config.yaml: |
+    # exemptions:
+    #   # exemption valid for all rules on all containers in all controllers of this namespace
+    #   - namespace: kube-system
+
+    checks:
+      ### security
+      hostIPCSet: danger
+      hostPIDSet: danger
+      notReadOnlyRootFilesystem: danger
+      privilegeEscalationAllowed: danger
+      runAsRootAllowed: danger
+      runAsPrivileged: danger
+      insecureCapabilities: warning
+      dangerousCapabilities: danger
+      hostNetworkSet: warning
+      hostPortSet: warning
+      tlsSettingsMissing: danger
+      ### efficiency
+      cpuRequestsMissing: warning
+      memoryRequestsMissing: warning
+      cpuLimitsMissing: danger
+      memoryLimitsMissing: danger
+      ### reliability
+      readinessProbeMissing: warning
+      livenessProbeMissing: warning
+      tagNotSpecified: danger
+      pullPolicyNotAlways: ignore
+      priorityClassNotSet: ignore
+      missingPodDisruptionBudget: ignore
+      ### custom
+      imageRegistry: danger
+      resourceLimits: danger
+
+    customChecks:
+      imageRegistry:
+        successMessage: Image comes from allowed registries
+        failureMessage: Image should not be from disallowed registry
+        category: Images
+        target: Container
+        schema:
+          '$schema': http://json-schema.org/draft-07/schema
+          type: object
+          properties:
+            image:
+              type: string
+              oneOf:
+                - pattern: ^eu.grc.io
+                - pattern: ^docker.io
+                - pattern: ^quay.io
+      resourceLimits:
+        containers:
+          exclude:
+            - initContainer
+        successMessage: Resource limits are within the required range
+        failureMessage: Resource limits should be within the required range
+        category: Resources
+        target: Container
+        schema:
+          '$schema': http://json-schema.org/draft-07/schema
+          type: object
+          required:
+            - resources
+          properties:
+            resources:
+              type: object
+              required:
+                - limits
+              properties:
+                limits:
+                  type: object
+                  required:
+                    - memory
+                    - cpu
+                  properties:
+                    cpu:
+                      type: string
+                      resourceMinimum: 10m
+                      resourceMaximum: 50m
+                    memory:
+                      type: string
+                      resourceMinimum: 1Mi
+                      resourceMaximum: 64Mi

@@ -1,0 +1,12 @@
+apiVersion: rbacmanager.reactiveops.io/v1beta1
+kind: RBACDefinition
+metadata:
+  name: guests
+rbacBindings:
+  - name: user3
+    subjects:
+      - kind: User
+        name: user3@dex.io
+    roleBindings:
+      - clusterRole: custom-portforward-only
+        namespace: default

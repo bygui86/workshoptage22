@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busybox
+spec:
+  securityContext:
+    runAsUser: 1000
+    runAsGroup: 3000
+    fsGroup: 2000
+    seccompProfile:
+      type: RuntimeDefault
+  containers:
+    - name: busybox
+      # arm64
+      image: busybox:1.35.0@sha256:eae83ae0dab6aa3a8dbe98f44de41e17701ee659f6a2988e54fe783b6a687062
+      imagePullPolicy: IfNotPresent
+      command: [ "sh", "-c", "sleep 1h" ]
+      resources:
+        requests:
+          cpu: 100m
+          memory: 32Mi
+        limits:
+          cpu: 100m
+          memory: 32Mi
+      volumeMounts:
+        - name: empty-dir
+          mountPath: /data/demo
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 3000
+        privileged: false
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop: [ ALL ]
+        readOnlyRootFilesystem: true
+        seccompProfile:
+          type: RuntimeDefault
+  volumes:
+    - name: empty-dir
+      emptyDir: {}

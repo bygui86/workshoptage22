@@ -1,0 +1,15 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ${USER}
+  namespace: ${NAMESPACE}
+  labels:
+    authn-source: ${AUTHN_SOURCE}
+subjects:
+  - apiGroup: rbac.authorization.k8s.io
+    kind: User
+    name: ${USER}
+roleRef:
+  kind: ClusterRole
+  name: admin
+  apiGroup: rbac.authorization.k8s.io
