@@ -19,10 +19,8 @@ minikube --driver virtualbox --cpus 4 --memory 8192 --disk-size 20g start -p aut
 minikube --driver qemu --cpus 4 --memory 8192 --disk-size 20g start -p authn
 
 # Enable Minikube 'ingress' addon, this may take few minutes
-minikube addons enable ingress
-
-# Minikube addons
-minikube addons list
+minikube addons enable ingress -p authn && \
+minikube addons list -p authn
 ```
 
 ## 2. Load environment variables
@@ -53,16 +51,22 @@ minikube addons list
 
 ## 5. Configure Minikube apiserver authN with Dex
 
+`(i) INFO` Only for this step, please open another terminal.
+
 ```bash
-# Reconfigure Minikube apiserver authentication
+# Required variable
+echo "Dex domain: ${DEX_DOMAIN}" && \
+echo "Dex k8s authenticator name: ${DEX_K8S_AUTH_NAME}" && \
+echo "Minikube cert file path: ${MINIKUBE_CERT_FILE_PATH}"
+
+# Reconfigure Minikube apiserver authentication (this could take a while)
 minikube \
 	--extra-config="apiserver.oidc-issuer-url=https://${DEX_DOMAIN}:32000" \
 	--extra-config="apiserver.oidc-client-id=example-app" \
 	--extra-config="apiserver.oidc-ca-file=${MINIKUBE_CERT_FILE_PATH}" \
 	--extra-config="apiserver.oidc-username-claim=email" \
 	--extra-config="apiserver.oidc-groups-claim=groups" \
-	start
-sleep 5
+	start -p authn
 
 # Wait for K8s apiserver to be ready
 kubectl wait pod -n kube-system -l component=kube-apiserver --for=condition=Ready
@@ -109,6 +113,10 @@ kubectl get pods -n kube-system
 ## 9. Login as a user
 
 ```bash
+# Required variables
+echo "Dex k8s authenticator host: ${DEX_K8S_AUTH_HOST}" && \
+echo "Dex k8s cluster: ${DEX_K8S_CLUSTER}"
+
 # Access dex-k8s-authenticator and login as a user you wish
 open http://${DEX_K8S_AUTH_HOST}
 

@@ -49,8 +49,6 @@ metadata:
   labels:
     app: openldap
 stringData:
-  # TODO replace "dc=example" with "dc=ldap"
-  # TODO replace "example.com" with "ldap.io"
   openldap.ldif: |
     dn: dc=example,dc=org
     objectClass: dcObject

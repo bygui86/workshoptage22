@@ -5,7 +5,7 @@
 
 # minikube
 
-export MINIKUBE_IP="$( minikube ip )"
+export MINIKUBE_IP="$( minikube ip -p authn )"
 echo "Minikube IP: ${MINIKUBE_IP}"
 
 export MINIKUBE_DOMAIN="${MINIKUBE_IP}.nip.io"
@@ -66,7 +66,6 @@ echo "Dex host: ${DEX_HOST}"
 export DEX_K8S_AUTH_HOST="dex-k8s-authenticator.${MINIKUBE_IP}.nip.io"
 echo "Dex k8s authenticator host: ${DEX_K8S_AUTH_HOST}"
 
-# TODO replace "example-app" with "dex-k8s-authn"   # origin: "Example App"
 export DEX_K8S_AUTH_NAME="example-app"
 echo "Dex k8s authenticator name: ${DEX_K8S_AUTH_NAME}"
 
@@ -74,7 +73,6 @@ echo "Dex k8s authenticator name: ${DEX_K8S_AUTH_NAME}"
 export DEX_K8S_AUTH_SECRET="ZXhhbXBsZS1hcHAtc2VjcmV0"
 echo "Dex k8s authenticator secret: ${DEX_K8S_AUTH_SECRET}"
 
-# TODO replace "demo" with "workshoptage22"
 export DEX_K8S_CLUSTER="demo"
 echo "Dex k8s cluster: ${DEX_K8S_CLUSTER}"
 
@@ -105,7 +103,6 @@ echo "OpenLDAP namespace: ${OPENLDAP_NAMESPACE}"
 export LDAP_HOST="openldap.${MINIKUBE_IP}.nip.io:32500"
 echo "LDAP host: ${LDAP_HOST}"
 
-# TODO replace "dc=example" with "dc=ldap"
 export LDAP_ADMIN_USER_DN="cn=admin,dc=example,dc=org"
 echo "LDAP admin user dn: ${LDAP_ADMIN_USER_DN}"
 
