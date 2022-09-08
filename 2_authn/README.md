@@ -181,10 +181,17 @@ kubectl get pods -n kube-system
 
 ```bash
 # Prepare some variables
+## macos
 export K8S_CA_PEM=$(\
 	kubectl config view --minify --flatten -o json \
 	| jq -r '.clusters[] | select(.name == "'$(kubectl config current-context)'") | .cluster."certificate-authority-data"' \
 	| base64 -D \
+	| sed 's/^/        /')
+## linux
+export K8S_CA_PEM=$(\
+	kubectl config view --minify --flatten -o json \
+	| jq -r '.clusters[] | select(.name == "'$(kubectl config current-context)'") | .cluster."certificate-authority-data"' \
+	| base64 -d \
 	| sed 's/^/        /')
 echo "K8s ca pem: ${K8S_CA_PEM}"
 export TRUSTED_ROOT_CA=$(cat ssl/ca.pem | sed 's/^/        /')
@@ -221,7 +228,7 @@ kubectl get pods -n ${DEX_NAMESPACE}
 # Access dex-k8s-authenticator and try to login with Email
 # email: 'user1@dex.io'
 # password: 'password'
-open http://${DEX_K8S_AUTH_HOST}
+open http://$DEX_K8S_AUTH_HOST
 ```
 
 ## 7. Deploy LDAP server
@@ -314,6 +321,7 @@ kubectl get rolebindings -A -l authn-source=${AUTHN_SOURCE}
 ```bash
 # [OPTIONAL] Backup kubeconfig
 cp ${HOME}/.kube/config ${HOME}/.kube/config_bak
+rm -f ${HOME}/.kube/config
 
 # Access dex-k8s-authenticator and try to login with Email
 # email: 'user1@dex.io'
