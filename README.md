@@ -39,7 +39,7 @@ so please be sure to be proficient with any alternative you choose.
 
 ## Presentation
 
-See [here](docs/presentation.key)
+See [here](docs/presentation.pdf)
 
 ---
 
