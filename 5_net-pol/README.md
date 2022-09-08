@@ -37,11 +37,11 @@ kubectl wait --for=condition=ready pod -l test=network-policies
 # if 'jq' is installed
 export BUSYBOX_A_IP_ADDRESS=$(kubectl get pod busybox-a -o json | jq -r '.status.podIP')
 export BUSYBOX_B_IP_ADDRESS=$(kubectl get pod busybox-b -o json | jq -r '.status.podIP')
-export BUSYBOX_C_IP_ADDRESS=$(kubectl get pod busybox-c -o json | jq -r '.status.podIP')
+export BUSYBOX_C_IP_ADDRESS=$(kubectl get pod busybox-c -o json -n kube-system | jq -r '.status.podIP')
 # otherwise manually :(
-export BUSYBOX_A_IP_ADDRESS=...
-export BUSYBOX_B_IP_ADDRESS=...
-export BUSYBOX_C_IP_ADDRESS=...
+export BUSYBOX_A_IP_ADDRESS=10.244.168.133
+export BUSYBOX_B_IP_ADDRESS=10.244.168.132
+export BUSYBOX_C_IP_ADDRESS=10.244.168.131
 ```
 
 ## 4. Check connectivity
@@ -50,20 +50,20 @@ export BUSYBOX_C_IP_ADDRESS=...
 # from busybox-a to busybox-b
 kubectl exec -n default -ti busybox-a -- sh
 
-ping ${BUSYBOX_B_IP_ADDRESS}
+ping 10.244.168.132
 # expected result
 # 	working
-ping ${BUSYBOX_C_IP_ADDRESS}
+ping 10.244.168.131
 # expected result
 # 	working
 
 # from busybox-b to busybox-a
 kubectl exec -n default -ti busybox-b -- sh
 
-ping ${BUSYBOX_A_IP_ADDRESS}
+ping 10.244.168.133
 # expected result
 # 	working
-ping ${BUSYBOX_C_IP_ADDRESS}
+ping 10.244.168.131
 # expected result
 # 	working
 ```
@@ -80,30 +80,30 @@ kubectl apply -f yaml/deny-all.yaml
 # from busybox-a to busybox-b
 kubectl exec -n default -ti busybox-a -- sh
 
-ping ${BUSYBOX_B_IP_ADDRESS}
+ping 10.244.168.132
 # expected result
 # 	not working
-ping ${BUSYBOX_C_IP_ADDRESS}
+ping 10.244.168.131
 # expected result
 # 	not working
 
 # from busybox-b to busybox-a
 kubectl exec -n default -ti busybox-b -- sh
 
-ping ${BUSYBOX_A_IP_ADDRESS}
+ping 10.244.168.133
 # expected result
 # 	not working
-ping ${BUSYBOX_C_IP_ADDRESS}
+ping 10.244.168.131
 # expected result
 # 	not working
 
 # from busybox-c to busybox-a and busybox-b
 kubectl exec -n kube-system -ti busybox-c -- sh
 
-ping ${BUSYBOX_A_IP_ADDRESS}
+ping 10.244.168.133
 # expected result
 # 	not working
-ping ${BUSYBOX_B_IP_ADDRESS}
+ping 10.244.168.132
 # expected result
 # 	not working
 ```
@@ -125,30 +125,30 @@ kubectl apply -f yaml/allow-inside-ns.yaml
 # from busybox-a to busybox-b
 kubectl exec -n default -ti busybox-a -- sh
 
-ping ${BUSYBOX_B_IP_ADDRESS}
+ping 10.244.168.132
 # expected result
 # 	working
-ping ${BUSYBOX_C_IP_ADDRESS}
+ping 10.244.168.131
 # expected result
 # 	not working
 
 # from busybox-b to busybox-a
 kubectl exec -n default -ti busybox-b -- sh
 
-ping ${BUSYBOX_A_IP_ADDRESS}
+ping 10.244.168.133
 # expected result
 # 	working
-ping ${BUSYBOX_C_IP_ADDRESS}
+ping 10.244.168.131
 # expected result
 # 	not working
 
 # from busybox-c to busybox-a and busybox-b
 kubectl exec -n kube-system -ti busybox-c -- sh
 
-ping ${BUSYBOX_A_IP_ADDRESS}
+ping 10.244.168.133
 # expected result
 # 	not working
-ping ${BUSYBOX_B_IP_ADDRESS}
+ping 10.244.168.132
 # expected result
 # 	not working
 ```
@@ -165,30 +165,30 @@ kubectl apply -f yaml/allow-c.yaml
 # from busybox-a to busybox-b
 kubectl exec -n default -ti busybox-a -- sh
 
-ping ${BUSYBOX_B_IP_ADDRESS}
+ping 10.244.168.132
 # expected result
 # 	working
-ping ${BUSYBOX_C_IP_ADDRESS}
+ping 10.244.168.131
 # expected result
 # 	not working
 
 # from busybox-b to busybox-a
 kubectl exec -n default -ti busybox-b -- sh
 
-ping ${BUSYBOX_A_IP_ADDRESS}
+ping 10.244.168.133
 # expected result
 # 	working
-ping ${BUSYBOX_C_IP_ADDRESS}
+ping 10.244.168.131
 # expected result
 # 	not working
 
 # from busybox-c to busybox-a and busybox-b
 kubectl exec -n kube-system -ti busybox-c -- sh
 
-ping ${BUSYBOX_A_IP_ADDRESS}
+ping 10.244.168.133
 # expected result
 # 	working
-ping ${BUSYBOX_B_IP_ADDRESS}
+ping 10.244.168.132
 # expected result
 # 	not working
 ```
