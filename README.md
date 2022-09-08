@@ -24,4 +24,4 @@ See [here](docs/presentation.key)
 
 ## Docs
 
-- [TODO](docs/todo.md)
+- [NSA-CISA guidance](docs/NSA-CISA_CTR_KUBERNETES_HARDENING_GUIDANCE_1.2_20220829.PDF)
