@@ -2,6 +2,10 @@
 # base image
 FROM debian:bullseye
 
+# environment variables
+ENV GIT_USERNAME joker
+ENV GIT_TOKEN supersecret
+
 # install additional packages
 RUN apt-get update -qqy && \
 	apt-get install -qqy \

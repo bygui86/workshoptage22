@@ -1,13 +1,16 @@
 
 # base image (amd64)
-FROM alpine:3.16.2@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870
+# FROM alpine:3.16.2@sha256:1304f174557314a7ed9eddb4eab12fed12cb0cd9809e4c28f29af86979a3c870
 # base image (arm64/v8)
-# FROM alpine:3.16.2@sha256:ed73e2bee79b3428995b16fce4221fc715a849152f364929cdccdc83db5f3d5c
+FROM alpine:3.16.2@sha256:ed73e2bee79b3428995b16fce4221fc715a849152f364929cdccdc83db5f3d5c
 
 # args
 ARG GCLOUD_SDK_VERSION=399.0.0
 # KUBECTL_VERSION defaults to latest if not specified
 ARG KUBECTL_VERSION=v1.25.0
+
+ARG GIT_USERNAME
+ARG GIT_TOKEN
 
 # install additional packages
 RUN apk update && \
@@ -55,8 +58,10 @@ RUN KUBECTL_ARCH=`cat /tmp/kubectl-arch` && \
 # set current dir
 WORKDIR /tmp
 
+# setting folders and files permissions to uid 1001
+
 # set user
-USER 1001
+USER 1001:1001
 
 # entrypoint
 ENTRYPOINT ["/bin/sh", "-c", "while :; do echo 'I go to sleep for a bit, see you later...'; sleep 3600; done"]
