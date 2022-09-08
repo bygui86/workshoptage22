@@ -418,7 +418,7 @@ kubectl get rolebindings -n user1
 minikube delete -p authn
 
 # Delete Minikube certs
-rm -rf ${MINIKUBE_FILES_PATH}/*
+rm -rf $HOME/.minikube/files/*
 
 # Delete all .kube/certs
 rm -rf ${HOME}/.kube/certs
